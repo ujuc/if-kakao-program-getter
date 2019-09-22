@@ -1,0 +1,12 @@
+name: Test
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-lastest
+    steps:
+    - uses: actions/checkout@1
+    - name: Run tests
+      run: |
+        cargo test --verbose
