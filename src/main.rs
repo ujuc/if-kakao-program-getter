@@ -2,17 +2,12 @@ use std::io;
 use std::fs;
 use json::{JsonValue, JsonResult};
 
-struct Speaker {
-    name: String,
-    org: String,
-}
-
 struct Session {
     day: String,
     title: String,
-    tags: Vec<String>,
+    tags: String,
     description: String,
-    speakers: Vec<Speaker>,
+    speakers: String,
     pdf_url: String,
     video_url: String,
 }
@@ -49,27 +44,32 @@ fn get_sessions(contents: &JsonValue) -> Vec<Session> {
     _result
 }
 
-fn get_tag_list(tags: &JsonValue) -> Vec<String> {
+fn get_tag_list(tags: &JsonValue) -> String {
     let mut _tags: Vec<String> = Vec::new();
 
     for tag in tags.members() {
-        _tags.push(tag.to_string())
+        if _tags.len() > 1 {
+            _tags.push(format!(", "));
+        }
+
+        _tags.push(tag.to_string().replace(" ", ""))
     }
 
-    _tags
+    format!("{}", _tags.join(""))
 }
 
-fn get_speaker_list(speakers: &JsonValue) -> Vec<Speaker> {
-    let mut _speakers: Vec<Speaker> = Vec::new();
+fn get_speaker_list(speakers: &JsonValue) -> String {
+    let mut _speakers: Vec<String> = Vec::new();
 
     for speaker in speakers.members() {
-        _speakers.push(Speaker {
-            name: speaker["name"].to_string(),
-            org: speaker["org"].to_string(),
-        })
+        if _speakers.len() > 1 {
+            _speakers.push(format!(", "));
+        }
+
+        _speakers.push(format!("{} <{}>", speaker["name"], speaker["org"]));
     }
 
-    _speakers
+    format!("{}", _speakers.join(""))
 }
 
 fn main() -> Result<(), io::Error> {
