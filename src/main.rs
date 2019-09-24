@@ -1,5 +1,6 @@
 use std::io;
 use std::fs;
+use std::path;
 use json::{JsonValue, JsonResult};
 
 struct Session {
@@ -29,7 +30,8 @@ fn get_sessions(contents: &JsonValue) -> Vec<Session> {
         for session in sessions_list.members() {
             let _session = Session {
                 day: session["days"]["display"].to_string(),
-                title: session["title"].to_string(),
+                title: session["title"].to_string()
+                    .replace("\n", ""),
                 tags: get_tag_list(&session["tags"]),
                 description: session["description"].to_string(),
                 speakers: get_speaker_list(&session["speakers"]),
@@ -48,7 +50,7 @@ fn get_tag_list(tags: &JsonValue) -> String {
     let mut _tags: Vec<String> = Vec::new();
 
     for tag in tags.members() {
-        if _tags.len() > 1 {
+        if _tags.len() > 0 {
             _tags.push(format!(", "));
         }
 
@@ -62,7 +64,7 @@ fn get_speaker_list(speakers: &JsonValue) -> String {
     let mut _speakers: Vec<String> = Vec::new();
 
     for speaker in speakers.members() {
-        if _speakers.len() > 1 {
+        if _speakers.len() > 0 {
             _speakers.push(format!(", "));
         }
 
@@ -83,6 +85,19 @@ fn main() -> Result<(), io::Error> {
     sessions.extend(&day2);
 
     println!("{:?}", sessions.len());
+
+    let path = path::Path::new("data/out.csv");
+    let mut wtr = csv::Writer::from_path(&path)?;
+
+    wtr.write_record(&["Title", "Day", "Tags", "Description", "Speakers", "PDF URL", "Video URL"])?;
+    for d1 in day1 {
+       wtr.serialize((d1.title, d1.day, d1.tags, d1.description, d1.speakers, d1.pdf_url, d1.video_url))?;
+    }
+    for d2 in day2 {
+        wtr.serialize((d2.title, d2.day, d2.tags, d2.description, d2.speakers, d2.pdf_url, d2.video_url))?;
+    }
+
+    wtr.flush()?;
 
     Ok(())
 }

@@ -6,3 +6,5 @@ edition = "2018"
 
 [dependencies]
 json = "*"
+csv = "*"
+serde = "*"
